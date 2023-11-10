@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import ApiService from '../services/ApiService';
-import { useLocation   } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import classNames from 'classnames';
-import ProviderItem from './ProviderItem';
+
+const ToastContainer = lazy(() => import('react-toastify').then(module => ({ default: module.ToastContainer })));
+const ProviderItem = lazy(() => import('./ProviderItem'));
 
 const Home = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -15,64 +17,77 @@ const Home = () => {
 
   const openSidebar = searchParams.get('toggel-sidebar');
   useEffect(() => {
-
     ApiService.getProviders()
       .then((p) => {
-        if(openSidebar){
+        if (openSidebar) {
           setIsOpen(true);
         }
         setProviders(p.data)
       })
-      .catch((error) => console.error('Error fetching providers:', error));
+      .catch((error) => {
+        console.error('Error fetching providers:', error);
+      });
   }, []);
 
-  const handleSidebarToggle = ({hide}) => {
-    setIsOpen(isOpen && hide ?  false : !isOpen);
+  const hideAllPreviousOne = () => {
+    const linkCollapse = document.getElementsByClassName('has-submenu open');
+    for (let i = 0; i < linkCollapse.length; i++) {
+      linkCollapse[i].classList.toggle('open');
+    }
+  }
+
+  const handleSidebarToggle = ({ hide }) => {
+    hideAllPreviousOne();
+    setIsOpen(isOpen && hide ? false : !isOpen);
   };
 
   const handleSubmenuToggle = async (e, provider) => {
-      setSubmenuItems([]);
-      setLoading(true);
-      e.preventDefault();
-      e.stopPropagation();
-      e.currentTarget.classList.toggle('open');
+    hideAllPreviousOne();
+    setSubmenuItems([]);
+    setLoading(true);
+    e.preventDefault();
+    e.stopPropagation();
+    e.currentTarget.classList.toggle('open');
+
     try {
       const response = await ApiService.getWebAPIs(provider);
       setSubmenuItems(response.apis);
       setSelectedProvider(provider);
       setLoading(false);
-      console.log('EEE')
     } catch (error) {
       setLoading(false);
       console.error('Error fetching submenu items:', error);
     }
   };
+
   return (
-    <div className={classNames('container', { overlay: isOpen })}  onClick={()=> handleSidebarToggle({ hide: isOpen} )}>
-    <button className="button" onClick={handleSidebarToggle}>
-      Explore Web APIs
-    </button>
-    <div className={classNames('sidebar', { open: isOpen })}>
-      <div className="header sd-header">
-        <h4>Select Provider</h4>
+    <div className={classNames('container', { overlay: isOpen })}>
+      <button className="button" onClick={handleSidebarToggle}>
+        Explore Web APIs
+      </button>
+      <div className={classNames('sidebar', { open: isOpen })}>
+        <div className="header sd-header">
+          <h4>Select Provider</h4>
+        </div>
+        <ul className="sidebar-items">
+          {providers.map((provider) => (
+            <Suspense key={provider} fallback={<div>Loading...</div>}>
+              <ProviderItem
+                provider={provider}
+                isOpen={isOpen}
+                selectedProvider={selectedProvider}
+                handleSubmenuToggle={handleSubmenuToggle}
+                submenuItems={submenuItems}
+                isLoading={isLoading}
+              />
+            </Suspense>
+          ))}
+        </ul>
       </div>
-      <ul className="sidebar-items">
-        {providers.map((provider) => (
-          <ProviderItem
-            key={provider}
-            provider={provider}
-            isOpen={isOpen}
-            selectedProvider={selectedProvider}
-            handleSubmenuToggle={handleSubmenuToggle}
-            submenuItems={submenuItems}
-            isLoading={isLoading}
-          >
-          </ProviderItem>
-        ))}
-      </ul>
-      
+      <Suspense fallback={<div>Loading...</div>}>
+        <ToastContainer />
+      </Suspense>
     </div>
-  </div>
   );
 };
 

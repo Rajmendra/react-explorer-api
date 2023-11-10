@@ -6,10 +6,8 @@ const ApiService = {
       return fetch(`https://api.apis.guru/v2/${provider}.json`).then(response => response.json());
     },
     getAPIDetails: (provider, xServiceName, api) => {
-      console.log('xServiceName', xServiceName);
       let providerName = provider;
-      if(xServiceName && xServiceName!='' && xServiceName !='undefined'){
-        console.log('xServiceName',xServiceName)
+      if(xServiceName && xServiceName!=='' && xServiceName !=='undefined'){
         providerName+= `:${xServiceName}`;
       }
       
