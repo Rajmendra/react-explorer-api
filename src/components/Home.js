@@ -15,7 +15,8 @@ const Home = () => {
   const search = useLocation().search
   const searchParams = new URLSearchParams(search);
 
-  const openSidebar = searchParams.get('toggel-sidebar');
+  const openSidebar = searchParams.get('toggle-sidebar');
+  console.log('openSidebar', openSidebar);
   useEffect(() => {
     ApiService.getProviders()
       .then((p) => {
