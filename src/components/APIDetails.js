@@ -22,12 +22,15 @@ const ContactInfo = ({ contact }) => (
 
 const ApiHeader = ({ apiDetails }) => (
   <div className='header'>
-    <h1>
+  <div className='header-child-left'>
+    
       <Suspense fallback={<div>Loading image...</div>}>
         <Image className='img-big' url={apiDetails?.['x-logo']?.url} />
       </Suspense>
-      {apiDetails.title}
+      </div>
+      <div className='header-child-right'><h1>{apiDetails.title}
     </h1>
+      </div>
   </div>
 );
 
