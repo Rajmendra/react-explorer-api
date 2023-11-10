@@ -13,14 +13,14 @@ To run the project locally, follow these steps:
 
     Clone the Repository:
 
-git clone https://github.com/your-username/web-explorer-api-project.git
-cd web-explorer-api-project
+    git clone https://github.com/your-username/web-explorer-api-project.git
+    cd web-explorer-api-project
 
 Install Dependencies:
 
-npm install
-
-Run the Application:
+    npm install
+    
+    Run the Application:
 
     npm start
 
